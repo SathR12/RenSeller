@@ -1,0 +1,20 @@
+Tech Stack
+
+Frontend
+Docker
+React
+Typescript
+CSS
+Vite
+
+Backend
+Docker
+Python
+FastAPI
+Claude SDK?
+
+Database
+Docker
+Mongo, postgres, supabase
+
+We are planning to have three containers, and have intercontainer communication. Docker is useful to make the project free from a lot of the application/ dependency specific errors. 

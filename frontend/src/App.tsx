@@ -24,6 +24,7 @@ const listings: Listing[] = [
 ]
 
 function App() {
+<<<<<<< HEAD
   const [activeCategory, setActiveCategory] = useState('All listings')
   const [search, setSearch] = useState('')
   const [favorites, setFavorites] = useState<number[]>([])
@@ -70,6 +71,10 @@ function App() {
 
       {showSellForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowSellForm(false) }}><div className="sell-modal" role="dialog" aria-modal="true" aria-labelledby="sell-title"><button className="modal-close" onClick={() => setShowSellForm(false)} type="button" aria-label="Close">×</button><p className="eyebrow">LIST SOMETHING NEW</p><h2 id="sell-title">What are you selling?</h2><p className="modal-copy">Add the basics now. You can fill in more details before posting.</p><label>Item title<input placeholder="e.g. Mini fridge, desk lamp..." /></label><label>Price<input placeholder="$ 0.00" /></label><div className="modal-actions"><button className="cancel-button" type="button" onClick={() => setShowSellForm(false)}>Cancel</button><button className="sell-button" type="button" onClick={() => setShowSellForm(false)}>Continue <span>→</span></button></div></div></div>}
     </div>
+=======
+  return (
+    <div> This works</div>
+>>>>>>> 3d8f75358b8094f397e14a987149a58e0e668fd8
   )
 }
 
