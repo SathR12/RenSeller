@@ -57,6 +57,14 @@ The expected response is:
 {"status":"healthy"}
 ```
 
+### Create an .env file for the database
+
+Create a .env.local file that contains the contents in .env.example
+and replace with proper url and key.
+
+For authentication, enable Email authentication in Supabase. Supabase will send a verification email after sign-up; set the local redirect URL to `http://localhost:5173/` under Authentication settings. Sign-up accepts only `@rpi.edu` addresses and automatically derives the username from the email prefix.
+
+
 ### Useful frontend commands
 
 Run these from `frontend`, or use the `npm --prefix frontend` form from the repository root:
