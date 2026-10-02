@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from .db import get_connection
 from app.api.health import router as health_router
 
 app = FastAPI(title="RenSeller API")
