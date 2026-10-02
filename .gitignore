@@ -4,4 +4,8 @@ frontend/dist/
 backend/.env
 backend/node_modules/
 
+**/__pycache__/
+*.py[cod]
+.venv/
+
 .DS_Store

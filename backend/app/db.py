@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 def get_connection():
-    return psycopg.connect(os.getenv("DATABASE_URL"))
+    # An empty URL uses libpq's PG* environment variables (set by Compose).
+    return psycopg.connect(DATABASE_URL, connect_timeout=3)
