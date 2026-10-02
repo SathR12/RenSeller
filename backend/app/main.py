@@ -10,6 +10,24 @@ def home():
 
 @app.get("/database-test")
 def test():
-    return {"message": "Will test this next time"}
+    try:
+        conn = get_connection()
+
+        cursor = conn.cursor()
+        cursor.execute("SELECT NOW();")
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return {
+            "message": "Database connected!",
+            "database_time": result[0]
+        }
+
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 app.include_router(health_router)
