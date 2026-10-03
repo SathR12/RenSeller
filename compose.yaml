@@ -1,0 +1,47 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    environment:
+      PGHOST: database
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB:-renseller}
+      PGUSER: ${POSTGRES_USER:-renseller}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-renseller_local}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  database:
+    profiles: ["database"]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-renseller}
+      POSTGRES_USER: ${POSTGRES_USER:-renseller}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-renseller_local}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
