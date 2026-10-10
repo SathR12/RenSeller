@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import Messages from './Messages'
 import './App.css'
 import Auth from './Auth'
 
@@ -24,11 +26,18 @@ const listings: Listing[] = [
 ]
 
 function App() {
+  const [session, setSession] = useState<Session | null>(null)
+  const [showMessages, setShowMessages] = useState(false)
+  const [messageListingId, setMessageListingId] = useState(listings[0].id)
   const [activeCategory, setActiveCategory] = useState('All listings')
   const [search, setSearch] = useState('')
   const [favorites, setFavorites] = useState<number[]>([])
   const [showSellForm, setShowSellForm] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const handleSessionChange = useCallback((nextSession: Session | null) => {
+    setSession(nextSession)
+    if (!nextSession) setShowMessages(false)
+  }, [])
   const visibleListings = listings.filter((listing) => {
     const matchesCategory = activeCategory === 'All listings' || listing.category === activeCategory
     const searchText = `${listing.title} ${listing.category}`.toLowerCase()
@@ -50,8 +59,8 @@ function App() {
           <a className="wordmark" href="#top" aria-label="RenSeller home"><span>REN</span>SELLER</a>
           <p className="campus-note">THE RPI STUDENT MARKETPLACE</p>
           <nav className="account-nav" aria-label="Account navigation">
-            <button className="text-button" type="button">Messages</button>
-            <Auth />
+            {session && <button className="text-button messages-nav-button" type="button" onClick={() => setShowMessages(true)}>Messages</button>}
+            <Auth onSessionChange={handleSessionChange} />
             <button className="sell-button" type="button" onClick={() => setShowSellForm(true)}>Sell an item <span>+</span></button>
           </nav>
         </div>
@@ -69,9 +78,11 @@ function App() {
         <section className="listings-section page-width"><div className="listing-heading"><div><h2>Freshly listed</h2><p>{visibleListings.length} items listed by RPI students</p></div><button className="filter-button" type="button">Filter <span>☷</span></button></div>{visibleListings.length > 0 ? <div className="listing-grid">{visibleListings.map((listing) => <article className="listing-card" key={listing.id} onClick={() => setSelectedListing(listing)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setSelectedListing(listing) }} role="button" tabIndex={0}><div className="listing-image-wrap"><img src={listing.image} alt={listing.title} /><button className={favorites.includes(listing.id) ? 'favorite-button saved' : 'favorite-button'} onClick={(event) => { event.stopPropagation(); toggleFavorite(listing.id) }} type="button" aria-label={favorites.includes(listing.id) ? 'Remove from favorites' : 'Save listing'}>{favorites.includes(listing.id) ? '♥' : '♡'}</button><span className="condition-tag">{listing.condition}</span></div><div className="listing-details"><div className="price-line"><h3>{listing.title}</h3><strong>{listing.price}</strong></div><p className="listing-meta">RPI campus <span>·</span> {listing.category}</p><p className="seller-line"><span className="avatar">{listing.seller[0]}</span> Listed by {listing.seller}</p></div></article>)}</div> : <div className="empty-state"><strong>No listings found</strong><span>Try another search or category.</span></div>}</section>
       </main>
 
+      {session && <Messages key={session.user.id} isOpen={showMessages} listings={listings} selectedListingId={messageListingId} onSelectListing={setMessageListingId} onClose={() => setShowMessages(false)} />}
+
       <footer className="site-footer"><div className="page-width"><span className="wordmark small"><span>REN</span>SELLER</span><span>MADE FOR STUDENTS, BY STUDENTS.</span><span>© 2026 RENSELLER</span></div></footer>
 
-      {selectedListing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeListingDetails() }}><div className="listing-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title"><button className="modal-close" onClick={closeListingDetails} type="button" aria-label="Close listing details">×</button><div className="listing-modal-image"><img src={selectedListing.image} alt={selectedListing.title} /><span className="condition-tag">{selectedListing.condition}</span></div><div className="listing-modal-content"><div className="listing-modal-heading"><div><p className="eyebrow">{selectedListing.category}</p><h2 id="listing-title">{selectedListing.title}</h2></div><strong>{selectedListing.price}</strong></div><p className="listing-modal-meta">RPI campus <span>·</span> Listed by {selectedListing.seller}</p><p className="modal-copy">A campus pickup listing in {selectedListing.condition.toLowerCase()}. Message the seller to ask a question or arrange a convenient meeting time.</p><div className="listing-modal-actions"><button className="favorite-detail-button" type="button" onClick={() => toggleFavorite(selectedListing.id)}>{favorites.includes(selectedListing.id) ? '♥ Saved' : '♡ Save listing'}</button><button className="sell-button" type="button">Message seller <span>→</span></button></div></div></div></div>}
+      {selectedListing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeListingDetails() }}><div className="listing-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title"><button className="modal-close" onClick={closeListingDetails} type="button" aria-label="Close listing details">×</button><div className="listing-modal-image"><img src={selectedListing.image} alt={selectedListing.title} /><span className="condition-tag">{selectedListing.condition}</span></div><div className="listing-modal-content"><div className="listing-modal-heading"><div><p className="eyebrow">{selectedListing.category}</p><h2 id="listing-title">{selectedListing.title}</h2></div><strong>{selectedListing.price}</strong></div><p className="listing-modal-meta">RPI campus <span>·</span> Listed by {selectedListing.seller}</p><p className="modal-copy">A campus pickup listing in {selectedListing.condition.toLowerCase()}. Message the seller to ask a question or arrange a convenient meeting time.</p><div className="listing-modal-actions"><button className="favorite-detail-button" type="button" onClick={() => toggleFavorite(selectedListing.id)}>{favorites.includes(selectedListing.id) ? '♥ Saved' : '♡ Save listing'}</button><button className="sell-button" type="button" disabled={!session} onClick={() => { setMessageListingId(selectedListing.id); setShowMessages(true); closeListingDetails() }}>{session ? 'Message seller' : 'Sign in to message'} <span>→</span></button></div></div></div></div>}
 
       {showSellForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowSellForm(false) }}><div className="sell-modal" role="dialog" aria-modal="true" aria-labelledby="sell-title"><button className="modal-close" onClick={() => setShowSellForm(false)} type="button" aria-label="Close">×</button><p className="eyebrow">LIST SOMETHING NEW</p><h2 id="sell-title">What are you selling?</h2><p className="modal-copy">Add the basics now. You can fill in more details before posting.</p><label>Item title<input placeholder="e.g. Mini fridge, desk lamp..." /></label><label>Price<input placeholder="$ 0.00" /></label><div className="modal-actions"><button className="cancel-button" type="button" onClick={() => setShowSellForm(false)}>Cancel</button><button className="sell-button" type="button" onClick={() => setShowSellForm(false)}>Continue <span>→</span></button></div></div></div>}
 

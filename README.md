@@ -11,6 +11,18 @@ this checkout:
 cd /mnt/j/Code/Projects/RenSeller
 ```
 
+Before building, copy `frontend/.env.example` to `frontend/.env.local` and set
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Compose mounts that file
+only during the frontend build. Vite includes these public settings in the browser
+bundle; use the publishable key here.
+
+After changing this file, rebuild without cache and restart the frontend:
+
+```sh
+docker compose build --no-cache frontend
+docker compose up -d frontend
+```
+
 From the repository root, run:
 
 ```sh
@@ -169,3 +181,23 @@ Use this instead:
 ```powershell
 npm --prefix frontend run dev
 ```
+
+### Password recovery
+
+The sign-in form includes **Forgot password?**. Supabase emails a reset link;
+following it opens the new-password form. An authenticated recovery session is
+required to update the password. Expired links offer **Request new link**.
+
+In Supabase Authentication URL Configuration, allow these exact redirect URLs
+for the environments you use:
+
+- `http://localhost:8080/?recovery=1` (Docker)
+- `http://localhost:5173/?recovery=1` (Vite)
+- Your deployed app origin followed by `/?recovery=1`
+
+Keep the Supabase Reset Password email template linked to `{{ .ConfirmationURL }}`
+so the recovery token is verified before redirecting to the app. Configure SMTP
+for delivery to your users' RPI inboxes. Test the email flow with a real account:
+request a link, open it, set a new password, sign out, and sign in with the new
+password. Supabase dashboard settings and email delivery are configured separately
+from this repository.
