@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Auth from './Auth'
+import Profile from './Profile'
 
 type Listing = {
   id: number
@@ -29,6 +30,24 @@ function App() {
   const [favorites, setFavorites] = useState<number[]>([])
   const [showSellForm, setShowSellForm] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const [currentPage, setCurrentPage] = useState(window.location.hash === '#profile' ? 'profile' : 'home')
+
+  useEffect(() => {
+    function handleHashChange() {
+      setCurrentPage(window.location.hash === '#profile' ? 'profile' : 'home')
+    }
+
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  function openProfile() {
+    window.location.hash = 'profile'
+  }
+
+  function closeProfile() {
+    window.location.hash = 'top'
+  }
   const visibleListings = listings.filter((listing) => {
     const matchesCategory = activeCategory === 'All listings' || listing.category === activeCategory
     const searchText = `${listing.title} ${listing.category}`.toLowerCase()
@@ -51,7 +70,7 @@ function App() {
           <p className="campus-note">THE RPI STUDENT MARKETPLACE</p>
           <nav className="account-nav" aria-label="Account navigation">
             <button className="text-button" type="button">Messages</button>
-            <Auth />
+            <Auth onProfileOpen={openProfile} />
             <button className="sell-button" type="button" onClick={() => setShowSellForm(true)}>Sell an item <span>+</span></button>
           </nav>
         </div>
@@ -62,11 +81,13 @@ function App() {
       </header>
 
       <main id="top">
+        {currentPage === 'profile' ? <Profile onBack={closeProfile} /> : <>
         <section className="welcome-band"><div className="page-width welcome-content"><div><p className="eyebrow">BUILT FOR CAMPUS LIFE</p><h1>Find your next <em>good thing.</em></h1><p className="welcome-copy">Buy, sell, and trade with people around you. No shipping, no strangers, no hassle.</p><div className="trust-row"><span>✓ Student-first</span><span>✓ Local pickup</span><span>✓ No listing fees</span></div></div></div></section>
 
         <section className="category-section page-width" aria-label="Browse campus categories"><div className="section-heading"><div><p className="eyebrow">BROWSE RPI CAMPUS</p><h2>What are you looking for?</h2></div><button className="view-all" type="button">View all listings <span>→</span></button></div><div className="category-scroller">{categories.map((category) => <button key={category} type="button" className={activeCategory === category ? 'category-chip active' : 'category-chip'} onClick={() => setActiveCategory(category)}>{category}</button>)}</div></section>
 
         <section className="listings-section page-width"><div className="listing-heading"><div><h2>Freshly listed</h2><p>{visibleListings.length} items listed by RPI students</p></div><button className="filter-button" type="button">Filter <span>☷</span></button></div>{visibleListings.length > 0 ? <div className="listing-grid">{visibleListings.map((listing) => <article className="listing-card" key={listing.id} onClick={() => setSelectedListing(listing)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setSelectedListing(listing) }} role="button" tabIndex={0}><div className="listing-image-wrap"><img src={listing.image} alt={listing.title} /><button className={favorites.includes(listing.id) ? 'favorite-button saved' : 'favorite-button'} onClick={(event) => { event.stopPropagation(); toggleFavorite(listing.id) }} type="button" aria-label={favorites.includes(listing.id) ? 'Remove from favorites' : 'Save listing'}>{favorites.includes(listing.id) ? '♥' : '♡'}</button><span className="condition-tag">{listing.condition}</span></div><div className="listing-details"><div className="price-line"><h3>{listing.title}</h3><strong>{listing.price}</strong></div><p className="listing-meta">RPI campus <span>·</span> {listing.category}</p><p className="seller-line"><span className="avatar">{listing.seller[0]}</span> Listed by {listing.seller}</p></div></article>)}</div> : <div className="empty-state"><strong>No listings found</strong><span>Try another search or category.</span></div>}</section>
+        </>}
       </main>
 
       <footer className="site-footer"><div className="page-width"><span className="wordmark small"><span>REN</span>SELLER</span><span>MADE FOR STUDENTS, BY STUDENTS.</span><span>© 2026 RENSELLER</span></div></footer>

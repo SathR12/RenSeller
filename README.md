@@ -144,6 +144,8 @@ and replace with proper url and key.
 
 For authentication, enable Email authentication in Supabase. Supabase will send a verification email after sign-up; set the local redirect URL to `http://localhost:5173/` under Authentication settings. Sign-up accepts only `@rpi.edu` addresses and automatically derives the username from the email prefix.
 
+The profile page uploads pictures to a public Supabase Storage bucket named `avatars`. Create that bucket under Storage before testing profile picture changes. Email changes also require confirmation through the new email address.
+
 
 ### Useful frontend commands
 
