@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from './lib/supabase'
+
 import './App.css'
 import Auth from './Auth'
 
@@ -14,14 +16,26 @@ type Listing = {
 
 const categories = ['All listings', 'Textbooks', 'Electronics', 'Furniture', 'Clothing', 'Tickets']
 
-const listings: Listing[] = [
-  { id: 1, title: 'MacBook Air M2, 13-inch', price: '$650', category: 'Electronics', image: 'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=900&q=85', condition: 'Like new', seller: 'Maya R.' },
-  { id: 2, title: 'Calculus: Early Transcendentals', price: '$35', category: 'Textbooks', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=900&q=85', condition: 'Good condition', seller: 'Evan T.' },
-  { id: 3, title: 'Mid-century desk and chair set', price: '$120', category: 'Furniture', image: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6b5?auto=format&fit=crop&w=900&q=85', condition: 'Good condition', seller: 'Jordan K.' },
-  { id: 4, title: 'Vintage varsity jacket', price: '$48', category: 'Clothing', image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=900&q=85', condition: 'Gently used', seller: 'Sam L.' },
-  { id: 5, title: 'Sony noise-canceling headphones', price: '$90', category: 'Electronics', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=85', condition: 'Like new', seller: 'Priya S.' },
-  { id: 6, title: 'IKEA KALLAX shelf unit', price: '$30', category: 'Furniture', image: 'https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=900&q=85', condition: 'Good condition', seller: 'Chris W.' },
-]
+type ListingRow = {
+  id: number
+  name: string
+  price: number
+  category: string
+  condtion: string
+  profiles: { display_name: string } | null
+}
+
+function toListing(row: ListingRow): Listing {
+  return {
+    id: row.id,
+    title: row.name,
+    price: `$${Number(row.price).toFixed(2).replace(/\.00$/, '')}`,
+    category: row.category,
+    condition: row.condtion ?? 'Good condition',
+    image: 'https://placehold.co/900x700?text=No+photo',
+    seller: row.profiles?.display_name ?? 'RPI student',
+  }
+}
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('All listings')
@@ -29,10 +43,28 @@ function App() {
   const [favorites, setFavorites] = useState<number[]>([])
   const [showSellForm, setShowSellForm] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const [listings, setListings] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+   useEffect(() => {
+    async function loadListings() {
+      const { data, error } = await supabase
+        .from('listings')
+        .select('id, name, price, category, condtion, profiles(display_name)')
+        .order('id', { ascending: false })
+
+      if (error) setError(error.message)
+      else setListings((data as unknown as ListingRow[]).map(toListing))
+      setLoading(false)
+    }
+    loadListings()
+  }, [])
+
   const visibleListings = listings.filter((listing) => {
-    const matchesCategory = activeCategory === 'All listings' || listing.category === activeCategory
-    const searchText = `${listing.title} ${listing.category}`.toLowerCase()
-    return matchesCategory && searchText.includes(search.toLowerCase())
+  const matchesCategory = activeCategory === 'All listings' || listing.category === activeCategory
+  const searchText = `${listing.title} ${listing.category}`.toLowerCase()
+  return matchesCategory && searchText.includes(search.toLowerCase())
   })
 
   function toggleFavorite(id: number) {
@@ -62,11 +94,104 @@ function App() {
       </header>
 
       <main id="top">
-        <section className="welcome-band"><div className="page-width welcome-content"><div><p className="eyebrow">BUILT FOR CAMPUS LIFE</p><h1>Find your next <em>good thing.</em></h1><p className="welcome-copy">Buy, sell, and trade with people around you. No shipping, no strangers, no hassle.</p><div className="trust-row"><span>✓ Student-first</span><span>✓ Local pickup</span><span>✓ No listing fees</span></div></div></div></section>
+        <section className="welcome-band">
+          <div className="page-width welcome-content">
+            <div>
+              <p className="eyebrow">BUILT FOR CAMPUS LIFE</p>
+              <h1>Find your next <em>good thing.</em></h1>
+              <p className="welcome-copy">Buy, sell, and trade with people around you. No shipping, no strangers, no hassle.</p>
+              <div className="trust-row">
+                <span>✓ Student-first</span>
+                <span>✓ Local pickup</span>
+                <span>✓ No listing fees</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <section className="category-section page-width" aria-label="Browse campus categories"><div className="section-heading"><div><p className="eyebrow">BROWSE RPI CAMPUS</p><h2>What are you looking for?</h2></div><button className="view-all" type="button">View all listings <span>→</span></button></div><div className="category-scroller">{categories.map((category) => <button key={category} type="button" className={activeCategory === category ? 'category-chip active' : 'category-chip'} onClick={() => setActiveCategory(category)}>{category}</button>)}</div></section>
+                <section className="category-section page-width" aria-label="Browse campus categories">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">BROWSE RPI CAMPUS</p>
+              <h2>What are you looking for?</h2>
+            </div>
+            <button className="view-all" type="button">View all listings <span>→</span></button>
+          </div>
+          <div className="category-scroller">
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className={activeCategory === category ? 'category-chip active' : 'category-chip'}
+                onClick={() => setActiveCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </section>
 
-        <section className="listings-section page-width"><div className="listing-heading"><div><h2>Freshly listed</h2><p>{visibleListings.length} items listed by RPI students</p></div><button className="filter-button" type="button">Filter <span>☷</span></button></div>{visibleListings.length > 0 ? <div className="listing-grid">{visibleListings.map((listing) => <article className="listing-card" key={listing.id} onClick={() => setSelectedListing(listing)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setSelectedListing(listing) }} role="button" tabIndex={0}><div className="listing-image-wrap"><img src={listing.image} alt={listing.title} /><button className={favorites.includes(listing.id) ? 'favorite-button saved' : 'favorite-button'} onClick={(event) => { event.stopPropagation(); toggleFavorite(listing.id) }} type="button" aria-label={favorites.includes(listing.id) ? 'Remove from favorites' : 'Save listing'}>{favorites.includes(listing.id) ? '♥' : '♡'}</button><span className="condition-tag">{listing.condition}</span></div><div className="listing-details"><div className="price-line"><h3>{listing.title}</h3><strong>{listing.price}</strong></div><p className="listing-meta">RPI campus <span>·</span> {listing.category}</p><p className="seller-line"><span className="avatar">{listing.seller[0]}</span> Listed by {listing.seller}</p></div></article>)}</div> : <div className="empty-state"><strong>No listings found</strong><span>Try another search or category.</span></div>}</section>
+        <section className="listings-section page-width">
+          <div className="listing-heading">
+            <div>
+              <h2>Freshly listed</h2>
+              <p>{visibleListings.length} items listed by RPI students</p>
+            </div>
+            <button className="filter-button" type="button">Filter <span>☷</span></button>
+          </div>
+
+          {loading ? (
+            <p>Loading…</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : visibleListings.length > 0 ? (
+            <div className="listing-grid">
+              {visibleListings.map((listing) => (
+                <article
+                  className="listing-card"
+                  key={listing.id}
+                  onClick={() => setSelectedListing(listing)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') setSelectedListing(listing)
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="listing-image-wrap">
+                    <img src={listing.image} alt={listing.title} />
+                    <button
+                      className={favorites.includes(listing.id) ? 'favorite-button saved' : 'favorite-button'}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggleFavorite(listing.id)
+                      }}
+                      type="button"
+                      aria-label={favorites.includes(listing.id) ? 'Remove from favorites' : 'Save listing'}
+                    >
+                      {favorites.includes(listing.id) ? '♥' : '♡'}
+                    </button>
+                    <span className="condition-tag">{listing.condition}</span>
+                  </div>
+                  <div className="listing-details">
+                    <div className="price-line">
+                      <h3>{listing.title}</h3>
+                      <strong>{listing.price}</strong>
+                    </div>
+                    <p className="listing-meta">RPI campus <span>·</span> {listing.category}</p>
+                    <p className="seller-line">
+                      <span className="avatar">{listing.seller[0]}</span> Listed by {listing.seller}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <strong>No listings found</strong>
+              <span>Try another search or category.</span>
+            </div>
+          )}
+        </section>
       </main>
 
       <footer className="site-footer"><div className="page-width"><span className="wordmark small"><span>REN</span>SELLER</span><span>MADE FOR STUDENTS, BY STUDENTS.</span><span>© 2026 RENSELLER</span></div></footer>
