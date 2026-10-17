@@ -1,5 +1,17 @@
 # RenSeller
-A web application that lets RPI students sell and buy anything.
+A web application that lets RPI students buy and sell affordable,
+campus-appropriate items from verified members of the RPI community.
+
+RenSeller focuses on local, on-campus exchanges for textbooks, clothing,
+electronics, dorm supplies, furniture, and similar items. The semester MVP
+includes RPI email accounts, listing creation and discovery, buyer/seller
+messaging, and basic reporting and moderation. An AI-powered recommendation
+system is an optional stretch goal after the core marketplace is reliable.
+
+See the [product requirements](docs/PRODUCT_REQUIREMENTS.md) for the product
+scope and semester goals, and the [architecture overview](docs/ARCHITECTURE.md)
+for the current and planned system design. Track implementation status in the
+[feature checklist](docs/feature_checklist.md).
 
 ## Run with Docker
 

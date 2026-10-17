@@ -4,6 +4,20 @@ This checklist reflects the current repository implementation. Items marked
 “implemented” are present in the codebase; items marked “to implement” are
 planned work or currently represented only by mock data/UI.
 
+## Semester goals
+
+- [ ] Deliver a functional RenSeller web application
+- [x] Allow students to create accounts with RPI email addresses
+- [ ] Allow users to create, edit, browse, search, and filter item listings
+- [ ] Add buyer/seller messaging for on-campus exchanges
+- [ ] Add user reporting and listing moderation
+- [ ] Test with RPI students and incorporate feedback
+- [ ] Launch a working version for the RPI community by the end of the semester
+- [ ] Optional stretch goal: add an AI-powered recommendation system
+
+See [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) for the complete
+product scope, user journeys, MVP requirements, and success criteria.
+
 ## How to track ownership
 
 We will use GitHub Issues and a GitHub Project for active work. This file will be
@@ -95,7 +109,8 @@ focused on the product roadmap rather than trying to maintain changing assignees
 - [ ] Add listing owner profiles and seller details
 - [ ] Add listing status management (active, sold, removed, expired)
 - [ ] Add reporting and moderation tools
-- [ ] Add AI personalization
+- [ ] Add campus exchange guidance and safety notices
+- [ ] Add AI-powered recommendation system
 
 ## Selling
 
@@ -122,6 +137,7 @@ focused on the product roadmap rather than trying to maintain changing assignees
 - [ ] Add transaction status tracking
 - [ ] Add buyer/seller ratings or reviews
 - [ ] Add safeguards for spam, abuse, and blocked users
+- [ ] Keep payments and shipping out of the MVP
 
 ## Backend and data
 
@@ -141,6 +157,15 @@ focused on the product roadmap rather than trying to maintain changing assignees
 - [ ] Avoid exposing raw database exception text from diagnostic endpoints
 - [ ] Add structured logging, rate limiting, and production error handling
 
+## Student testing and launch
+
+- [ ] Define a student usability-testing protocol
+- [ ] Test sign-up, listing creation, listing discovery, messaging, and
+  reporting with RPI students
+- [ ] Track feedback and blockers in GitHub Issues
+- [ ] Resolve launch-blocking feedback before release
+- [ ] Verify the MVP in a production-like deployment
+
 ## Quality, accessibility, and operations
 
 - [x] Frontend TypeScript build script
@@ -155,11 +180,22 @@ focused on the product roadmap rather than trying to maintain changing assignees
 - [ ] Add monitoring and health checks for production dependencies
 - [ ] Review security policies for Supabase Storage and user-owned data
 
+## Optional AI recommendations
+
+- [ ] Define measurable recommendation relevance and engagement criteria
+- [ ] Collect privacy-safe signals such as saved listings and viewed categories
+- [ ] Implement recommendations only after MVP marketplace flows are stable
+- [ ] Provide a recent/popular listings fallback for new users
+- [ ] Evaluate recommendations with student feedback before launch
+
 ## Suggested implementation order
 
 1. Add the database schema and migrations for profiles and listings.
 2. Add authenticated listing CRUD endpoints and replace sample listings.
 3. Finish the sell-item form, image uploads, and listing management.
 4. Persist favorites and profile history.
-5. Implement messaging and campus pickup/transaction status.
-6. Add tests, authorization checks, moderation, and production hardening.
+5. Implement messaging and campus exchange status.
+6. Add reporting, moderation, and safety guidance.
+7. Test the MVP with RPI students and resolve launch blockers.
+8. Add tests, authorization checks, and production hardening.
+9. Consider AI recommendations only if the MVP is stable and time permits.
