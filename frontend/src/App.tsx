@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import Auth from './Auth'
+import Messages from './Messages'
 import Profile from './Profile'
 
 type Listing = {
@@ -30,11 +31,12 @@ function App() {
   const [favorites, setFavorites] = useState<number[]>([])
   const [showSellForm, setShowSellForm] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
-  const [currentPage, setCurrentPage] = useState(window.location.hash === '#profile' ? 'profile' : 'home')
+  const [unreadMessages, setUnreadMessages] = useState(1)
+  const [currentPage, setCurrentPage] = useState(window.location.hash === '#profile' ? 'profile' : window.location.hash === '#messages' ? 'messages' : 'home')
 
   useEffect(() => {
     function handleHashChange() {
-      setCurrentPage(window.location.hash === '#profile' ? 'profile' : 'home')
+      setCurrentPage(window.location.hash === '#profile' ? 'profile' : window.location.hash === '#messages' ? 'messages' : 'home')
     }
 
     window.addEventListener('hashchange', handleHashChange)
@@ -46,6 +48,14 @@ function App() {
   }
 
   function closeProfile() {
+    window.location.hash = 'top'
+  }
+
+  function openMessages() {
+    window.location.hash = 'messages'
+  }
+
+  function closeMessages() {
     window.location.hash = 'top'
   }
   const visibleListings = listings.filter((listing) => {
@@ -69,7 +79,7 @@ function App() {
           <a className="wordmark" href="#top" aria-label="RenSeller home"><span>REN</span>SELLER</a>
           <p className="campus-note">THE RPI STUDENT MARKETPLACE</p>
           <nav className="account-nav" aria-label="Account navigation">
-            <button className="text-button" type="button">Messages</button>
+            <button className="text-button messages-nav-button" type="button" onClick={openMessages}>Messages {unreadMessages > 0 && <span aria-label={`${unreadMessages} unread messages`}>{unreadMessages}</span>}</button>
             <Auth onProfileOpen={openProfile} />
             <button className="sell-button" type="button" onClick={() => setShowSellForm(true)}>Sell an item <span>+</span></button>
           </nav>
@@ -81,7 +91,7 @@ function App() {
       </header>
 
       <main id="top">
-        {currentPage === 'profile' ? <Profile onBack={closeProfile} savedListings={listings.filter((listing) => favorites.includes(listing.id))} onToggleSaved={toggleFavorite} /> : <>
+        {currentPage === 'profile' ? <Profile onBack={closeProfile} onMessagesOpen={openMessages} savedListings={listings.filter((listing) => favorites.includes(listing.id))} onToggleSaved={toggleFavorite} /> : currentPage === 'messages' ? <Messages onBack={closeMessages} onUnreadCountChange={setUnreadMessages} /> : <>
         <section className="welcome-band"><div className="page-width welcome-content"><div><p className="eyebrow">BUILT FOR CAMPUS LIFE</p><h1>Find your next <em>good thing.</em></h1><p className="welcome-copy">Buy, sell, and trade with people around you. No shipping, no strangers, no hassle.</p><div className="trust-row"><span>✓ Student-first</span><span>✓ Local pickup</span><span>✓ No listing fees</span></div></div></div></section>
 
         <section className="category-section page-width" aria-label="Browse campus categories"><div className="section-heading"><div><p className="eyebrow">BROWSE RPI CAMPUS</p><h2>What are you looking for?</h2></div><button className="view-all" type="button">View all listings <span>→</span></button></div><div className="category-scroller">{categories.map((category) => <button key={category} type="button" className={activeCategory === category ? 'category-chip active' : 'category-chip'} onClick={() => setActiveCategory(category)}>{category}</button>)}</div></section>
@@ -92,7 +102,7 @@ function App() {
 
       <footer className="site-footer"><div className="page-width"><span className="wordmark small"><span>REN</span>SELLER</span><span>MADE FOR STUDENTS, BY STUDENTS.</span><span>© 2026 RENSELLER</span></div></footer>
 
-      {selectedListing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeListingDetails() }}><div className="listing-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title"><button className="modal-close" onClick={closeListingDetails} type="button" aria-label="Close listing details">×</button><div className="listing-modal-image"><img src={selectedListing.image} alt={selectedListing.title} /><span className="condition-tag">{selectedListing.condition}</span></div><div className="listing-modal-content"><div className="listing-modal-heading"><div><p className="eyebrow">{selectedListing.category}</p><h2 id="listing-title">{selectedListing.title}</h2></div><strong>{selectedListing.price}</strong></div><p className="listing-modal-meta">RPI campus <span>·</span> Listed by {selectedListing.seller}</p><p className="modal-copy">A campus pickup listing in {selectedListing.condition.toLowerCase()}. Message the seller to ask a question or arrange a convenient meeting time.</p><div className="listing-modal-actions"><button className="favorite-detail-button" type="button" onClick={() => toggleFavorite(selectedListing.id)}>{favorites.includes(selectedListing.id) ? '♥ Saved' : '♡ Save listing'}</button><button className="sell-button" type="button">Message seller <span>→</span></button></div></div></div></div>}
+      {selectedListing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeListingDetails() }}><div className="listing-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title"><button className="modal-close" onClick={closeListingDetails} type="button" aria-label="Close listing details">×</button><div className="listing-modal-image"><img src={selectedListing.image} alt={selectedListing.title} /><span className="condition-tag">{selectedListing.condition}</span></div><div className="listing-modal-content"><div className="listing-modal-heading"><div><p className="eyebrow">{selectedListing.category}</p><h2 id="listing-title">{selectedListing.title}</h2></div><strong>{selectedListing.price}</strong></div><p className="listing-modal-meta">RPI campus <span>·</span> Listed by {selectedListing.seller}</p><p className="modal-copy">A campus pickup listing in {selectedListing.condition.toLowerCase()}. Message the seller to ask a question or arrange a convenient meeting time.</p><div className="listing-modal-actions"><button className="favorite-detail-button" type="button" onClick={() => toggleFavorite(selectedListing.id)}>{favorites.includes(selectedListing.id) ? '♥ Saved' : '♡ Save listing'}</button><button className="sell-button" type="button" onClick={() => { closeListingDetails(); openMessages() }}>Message seller <span>→</span></button></div></div></div></div>}
 
       {showSellForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowSellForm(false) }}><div className="sell-modal" role="dialog" aria-modal="true" aria-labelledby="sell-title"><button className="modal-close" onClick={() => setShowSellForm(false)} type="button" aria-label="Close">×</button><p className="eyebrow">LIST SOMETHING NEW</p><h2 id="sell-title">What are you selling?</h2><p className="modal-copy">Add the basics now. You can fill in more details before posting.</p><label>Item title<input placeholder="e.g. Mini fridge, desk lamp..." /></label><label>Price<input placeholder="$ 0.00" /></label><div className="modal-actions"><button className="cancel-button" type="button" onClick={() => setShowSellForm(false)}>Cancel</button><button className="sell-button" type="button" onClick={() => setShowSellForm(false)}>Continue <span>→</span></button></div></div></div>}
 

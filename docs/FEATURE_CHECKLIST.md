@@ -127,7 +127,7 @@ focused on the product roadmap rather than trying to maintain changing assignees
 
 ## Communication and transactions
 
-- [ ] Implement the Messages navigation destination
+- [x] Implement the frontend Messages navigation destination and conversation prototype
 - [ ] Implement buyer-to-seller conversations
 - [ ] Store and retrieve messages securely
 - [ ] Add unread message indicators and notifications

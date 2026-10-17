@@ -4,6 +4,7 @@ import './Profile.css'
 
 type ProfileProps = {
   onBack: () => void
+  onMessagesOpen: () => void
   savedListings: SavedListing[]
   onToggleSaved: (id: number) => void
 }
@@ -35,7 +36,7 @@ const listings = [
   { title: 'Vintage varsity jacket', date: 'September 2, 2026', price: '$48', status: 'Sold' },
 ]
 
-export default function Profile({ onBack, savedListings, onToggleSaved }: ProfileProps) {
+export default function Profile({ onBack, onMessagesOpen, savedListings, onToggleSaved }: ProfileProps) {
   const [profileImage, setProfileImage] = useState('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -164,6 +165,7 @@ export default function Profile({ onBack, savedListings, onToggleSaved }: Profil
           <button className={activeSection === 'information' ? 'profile-tab active' : 'profile-tab'} type="button" onClick={() => setActiveSection('information')}>Information</button>
           <button className={activeSection === 'history' ? 'profile-tab active' : 'profile-tab'} type="button" onClick={() => setActiveSection('history')}>Purchase & listing history</button>
           <button className={activeSection === 'saved' ? 'profile-tab active' : 'profile-tab'} type="button" onClick={() => setActiveSection('saved')}>Saved listings <span className="profile-tab-count">{savedListings.length}</span></button>
+          <button className="profile-tab" type="button" onClick={onMessagesOpen}>Messages</button>
         </aside>
 
         <div className="profile-content">
