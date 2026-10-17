@@ -4,6 +4,18 @@ import './Profile.css'
 
 type ProfileProps = {
   onBack: () => void
+  savedListings: SavedListing[]
+  onToggleSaved: (id: number) => void
+}
+
+type SavedListing = {
+  id: number
+  title: string
+  price: string
+  category: string
+  image: string
+  condition: string
+  seller: string
 }
 
 type Feedback = {
@@ -23,14 +35,14 @@ const listings = [
   { title: 'Vintage varsity jacket', date: 'September 2, 2026', price: '$48', status: 'Sold' },
 ]
 
-export default function Profile({ onBack }: ProfileProps) {
+export default function Profile({ onBack, savedListings, onToggleSaved }: ProfileProps) {
   const [profileImage, setProfileImage] = useState('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [dorm, setDorm] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [activeSection, setActiveSection] = useState<'information' | 'history'>('information')
+  const [activeSection, setActiveSection] = useState<'information' | 'history' | 'saved'>('information')
   const [feedback, setFeedback] = useState<Feedback | null>(() => supabase ? null : { message: 'Add your Supabase variables to frontend/.env.local first.', type: 'error' })
   const [saving, setSaving] = useState(false)
   const [sessionReady, setSessionReady] = useState(!supabase)
@@ -151,6 +163,7 @@ export default function Profile({ onBack }: ProfileProps) {
         <aside className="profile-sidebar" aria-label="Profile sections">
           <button className={activeSection === 'information' ? 'profile-tab active' : 'profile-tab'} type="button" onClick={() => setActiveSection('information')}>Information</button>
           <button className={activeSection === 'history' ? 'profile-tab active' : 'profile-tab'} type="button" onClick={() => setActiveSection('history')}>Purchase & listing history</button>
+          <button className={activeSection === 'saved' ? 'profile-tab active' : 'profile-tab'} type="button" onClick={() => setActiveSection('saved')}>Saved listings <span className="profile-tab-count">{savedListings.length}</span></button>
         </aside>
 
         <div className="profile-content">
@@ -170,10 +183,13 @@ export default function Profile({ onBack }: ProfileProps) {
               <div className="profile-panel-heading"><div><p className="eyebrow">SECURITY</p><h2>Change password</h2></div><button className="sell-button" disabled={saving} type="submit">{saving ? 'Saving...' : 'Update password'}</button></div>
               <div className="profile-form-grid"><label>New password<input required minLength={6} type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} autoComplete="new-password" /></label><label>Confirm new password<input required minLength={6} type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" /></label></div>
             </form>
-          </> : <div className="history-stack">
+          </> : activeSection === 'history' ? <div className="history-stack">
             <div className="profile-panel"><div className="profile-panel-heading"><div><p className="eyebrow">PURCHASES</p><h2>Purchase history</h2></div><span className="history-count">{purchases.length} items</span></div><div className="history-list">{purchases.map((purchase) => <article className="history-row" key={purchase.title}><div><h3>{purchase.title}</h3><p>Bought from {purchase.seller} · {purchase.date}</p></div><div className="history-price"><strong>{purchase.price}</strong><span>{purchase.status}</span></div></article>)}</div></div>
             <div className="profile-panel"><div className="profile-panel-heading"><div><p className="eyebrow">SELLING</p><h2>Listing history</h2></div><span className="history-count">{listings.length} items</span></div><div className="history-list">{listings.map((listing) => <article className="history-row" key={listing.title}><div><h3>{listing.title}</h3><p>Listed on {listing.date}</p></div><div className="history-price"><strong>{listing.price}</strong><span className={listing.status === 'Sold' ? 'history-status sold' : 'history-status'}>{listing.status}</span></div></article>)}</div></div>
-          </div>}
+          </div> : <section className="profile-panel saved-listings-panel">
+            <div className="profile-panel-heading"><div><p className="eyebrow">YOUR BOOKMARKS</p><h2>Saved listings</h2></div><span className="history-count">{savedListings.length} {savedListings.length === 1 ? 'item' : 'items'}</span></div>
+            {savedListings.length > 0 ? <div className="saved-listings-grid">{savedListings.map((listing) => <article className="saved-listing-row" key={listing.id}><img src={listing.image} alt="" /><div className="saved-listing-details"><h3>{listing.title}</h3><p>{listing.category} · {listing.condition} · Listed by {listing.seller}</p><strong>{listing.price}</strong></div><button className="remove-saved-button" type="button" onClick={() => onToggleSaved(listing.id)} aria-label={`Remove ${listing.title} from saved listings`}>Remove</button></article>)}</div> : <div className="saved-listings-empty"><strong>No saved listings yet</strong><span>Use the heart button on a listing to save it here.</span><button className="back-button" type="button" onClick={onBack}>Browse listings →</button></div>}
+          </section>}
         </div>
       </div>
     </section>

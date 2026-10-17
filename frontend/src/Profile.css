@@ -8,6 +8,7 @@
 .profile-sidebar { align-self: start; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 3px; padding-right: 22px; }
 .profile-tab { background: transparent; border: 0; border-left: 3px solid transparent; color: var(--muted); font-family: 'Roboto Condensed', sans-serif; font-size: 13px; font-weight: 700; padding: 12px 10px; text-align: left; text-transform: uppercase; }
 .profile-tab:hover, .profile-tab.active { background: #fff; border-left-color: var(--rpi-red); color: var(--ink); }
+.profile-tab-count { color: var(--muted); float: right; font-size: 11px; margin-left: 8px; }
 .profile-content { min-width: 0; }
 .profile-feedback { font-size: 13px; line-height: 1.45; margin: 0 0 18px; }
 .profile-feedback.error { color: var(--rpi-red-dark); }
@@ -39,6 +40,21 @@
 .history-price strong { font-family: 'Roboto Condensed', sans-serif; font-size: 16px; }
 .history-price span { color: #2d6a4f; font-family: 'Roboto Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .history-price span.sold { color: var(--muted); }
+.saved-listings-panel { min-width: 0; }
+.saved-listings-grid { border-top: 1px solid var(--line); }
+.saved-listing-row { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 16px; padding: 16px 0; }
+.saved-listing-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.saved-listing-row img { background: #f1f1ef; flex: 0 0 auto; height: 76px; object-fit: cover; width: 92px; }
+.saved-listing-details { flex: 1; min-width: 0; }
+.saved-listing-details h3 { font-size: 17px; margin-bottom: 5px; }
+.saved-listing-details p { color: var(--muted); font-size: 12px; margin: 0 0 7px; }
+.saved-listing-details strong { font-family: 'Roboto Condensed', sans-serif; font-size: 16px; }
+.remove-saved-button { background: transparent; border: 1px solid #b7b9ba; border-radius: 0; color: var(--muted); flex: 0 0 auto; font-family: 'Roboto Condensed', sans-serif; font-size: 11px; font-weight: 700; padding: 9px 11px; text-transform: uppercase; }
+.remove-saved-button:hover { border-color: var(--rpi-red); color: var(--rpi-red); }
+.saved-listings-empty { align-items: flex-start; display: flex; flex-direction: column; gap: 9px; padding-top: 20px; }
+.saved-listings-empty strong { font-size: 17px; }
+.saved-listings-empty span { color: var(--muted); font-size: 13px; }
+.saved-listings-empty .back-button { margin: 7px 0 0; }
 .profile-loading { color: var(--muted); padding: 80px 0; }
 
 @media (max-width: 720px) {
@@ -54,4 +70,7 @@
   .profile-panel-heading .sell-button { align-self: stretch; }
   .history-row { align-items: start; flex-direction: column; gap: 11px; }
   .history-price { align-items: start; flex-direction: row; gap: 11px; }
+  .saved-listing-row { align-items: start; flex-wrap: wrap; }
+  .saved-listing-row img { height: 64px; width: 76px; }
+  .remove-saved-button { margin-left: 92px; }
 }

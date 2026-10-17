@@ -81,7 +81,7 @@ function App() {
       </header>
 
       <main id="top">
-        {currentPage === 'profile' ? <Profile onBack={closeProfile} /> : <>
+        {currentPage === 'profile' ? <Profile onBack={closeProfile} savedListings={listings.filter((listing) => favorites.includes(listing.id))} onToggleSaved={toggleFavorite} /> : <>
         <section className="welcome-band"><div className="page-width welcome-content"><div><p className="eyebrow">BUILT FOR CAMPUS LIFE</p><h1>Find your next <em>good thing.</em></h1><p className="welcome-copy">Buy, sell, and trade with people around you. No shipping, no strangers, no hassle.</p><div className="trust-row"><span>✓ Student-first</span><span>✓ Local pickup</span><span>✓ No listing fees</span></div></div></div></section>
 
         <section className="category-section page-width" aria-label="Browse campus categories"><div className="section-heading"><div><p className="eyebrow">BROWSE RPI CAMPUS</p><h2>What are you looking for?</h2></div><button className="view-all" type="button">View all listings <span>→</span></button></div><div className="category-scroller">{categories.map((category) => <button key={category} type="button" className={activeCategory === category ? 'category-chip active' : 'category-chip'} onClick={() => setActiveCategory(category)}>{category}</button>)}</div></section>
