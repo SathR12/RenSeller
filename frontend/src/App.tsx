@@ -21,7 +21,7 @@ type ListingRow = {
   name: string
   price: number
   category: string
-  condtion: string
+  condition: string
   profiles: { display_name: string } | null
 }
 
@@ -31,7 +31,7 @@ function toListing(row: ListingRow): Listing {
     title: row.name,
     price: `$${Number(row.price).toFixed(2).replace(/\.00$/, '')}`,
     category: row.category,
-    condition: row.condtion ?? 'Good condition',
+    condition: row.condition ?? 'Good condition',
     image: 'https://placehold.co/900x700?text=No+photo',
     seller: row.profiles?.display_name ?? 'RPI student',
   }
@@ -47,11 +47,18 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-   useEffect(() => {
+  const [newTitle, setNewTitle] = useState('')
+  const [newPrice, setNewPrice] = useState('')
+  const [newCategory, setNewCategory] = useState('Textbooks')
+  const [newCondition, setNewCondition] = useState('Good condition')
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+
+  useEffect(() => {
     async function loadListings() {
       const { data, error } = await supabase
         .from('listings')
-        .select('id, name, price, category, condtion, profiles(display_name)')
+        .select('id, name, price, category, condition')
         .order('id', { ascending: false })
 
       if (error) setError(error.message)
@@ -70,6 +77,46 @@ function App() {
   function toggleFavorite(id: number) {
     setFavorites((current) => current.includes(id) ? current.filter((favoriteId) => favoriteId !== id) : [...current, id])
   }
+  
+  async function handleCreateListing() {
+  setFormError(null)
+
+  const price = Number(newPrice.replace('$', ''))
+  if (!newTitle.trim() || Number.isNaN(price) || price < 0) {
+    setFormError('Enter a title and a valid price.')
+    return
+  }
+
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData.user) {
+    setFormError('You need to sign in to post a listing.')
+    return
+  }
+
+  setSaving(true)
+  const { data, error } = await supabase
+    .from('listings')
+    .insert({
+      name: newTitle.trim(),
+      price,
+      category: newCategory,
+      condition: newCondition,
+      seller_id: userData.user.id,
+    })
+    .select('id, name, price, category, condition')
+    .single()
+  setSaving(false)
+
+  if(error) {
+    setFormError(error.message)
+    return
+  }
+
+  setListings((current) => [toListing({ ...data, profiles: null } as ListingRow), ...current])
+  setNewTitle('')
+  setNewPrice('')
+  setShowSellForm(false)
+  }
 
   function closeListingDetails() {
     setSelectedListing(null)
@@ -84,7 +131,17 @@ function App() {
           <nav className="account-nav" aria-label="Account navigation">
             <button className="text-button" type="button">Messages</button>
             <Auth />
+
+
+
+
+            {/* Make this only appear when user is signed in*/}
             <button className="sell-button" type="button" onClick={() => setShowSellForm(true)}>Sell an item <span>+</span></button>
+
+
+
+
+
           </nav>
         </div>
         <div className="search-row page-width">
@@ -115,7 +172,7 @@ function App() {
               <p className="eyebrow">BROWSE RPI CAMPUS</p>
               <h2>What are you looking for?</h2>
             </div>
-            <button className="view-all" type="button">View all listings <span>→</span></button>
+            <button className="view-all" type="button">View all listings <span></span></button>
           </div>
           <div className="category-scroller">
             {categories.map((category) => (
@@ -137,7 +194,7 @@ function App() {
               <h2>Freshly listed</h2>
               <p>{visibleListings.length} items listed by RPI students</p>
             </div>
-            <button className="filter-button" type="button">Filter <span>☷</span></button>
+            <button className="filter-button" type="button">Filter <span></span></button>
           </div>
 
           {loading ? (
@@ -196,9 +253,44 @@ function App() {
 
       <footer className="site-footer"><div className="page-width"><span className="wordmark small"><span>REN</span>SELLER</span><span>MADE FOR STUDENTS, BY STUDENTS.</span><span>© 2026 RENSELLER</span></div></footer>
 
-      {selectedListing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeListingDetails() }}><div className="listing-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title"><button className="modal-close" onClick={closeListingDetails} type="button" aria-label="Close listing details">×</button><div className="listing-modal-image"><img src={selectedListing.image} alt={selectedListing.title} /><span className="condition-tag">{selectedListing.condition}</span></div><div className="listing-modal-content"><div className="listing-modal-heading"><div><p className="eyebrow">{selectedListing.category}</p><h2 id="listing-title">{selectedListing.title}</h2></div><strong>{selectedListing.price}</strong></div><p className="listing-modal-meta">RPI campus <span>·</span> Listed by {selectedListing.seller}</p><p className="modal-copy">A campus pickup listing in {selectedListing.condition.toLowerCase()}. Message the seller to ask a question or arrange a convenient meeting time.</p><div className="listing-modal-actions"><button className="favorite-detail-button" type="button" onClick={() => toggleFavorite(selectedListing.id)}>{favorites.includes(selectedListing.id) ? '♥ Saved' : '♡ Save listing'}</button><button className="sell-button" type="button">Message seller <span>→</span></button></div></div></div></div>}
+      {selectedListing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeListingDetails() }}><div className="listing-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title"><button className="modal-close" onClick={closeListingDetails} type="button" aria-label="Close listing details"></button><div className="listing-modal-image"><img src={selectedListing.image} alt={selectedListing.title} /><span className="condition-tag">{selectedListing.condition}</span></div><div className="listing-modal-content"><div className="listing-modal-heading"><div><p className="eyebrow">{selectedListing.category}</p><h2 id="listing-title">{selectedListing.title}</h2></div><strong>{selectedListing.price}</strong></div><p className="listing-modal-meta">RPI campus <span>·</span> Listed by {selectedListing.seller}</p><p className="modal-copy">A campus pickup listing in {selectedListing.condition.toLowerCase()}. Message the seller to ask a question or arrange a convenient meeting time.</p><div className="listing-modal-actions"><button className="favorite-detail-button" type="button" onClick={() => toggleFavorite(selectedListing.id)}>{favorites.includes(selectedListing.id) ? '♥ Saved' : '♡ Save listing'}</button><button className="sell-button" type="button">Message seller <span></span></button></div></div></div></div>}
 
-      {showSellForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowSellForm(false) }}><div className="sell-modal" role="dialog" aria-modal="true" aria-labelledby="sell-title"><button className="modal-close" onClick={() => setShowSellForm(false)} type="button" aria-label="Close">×</button><p className="eyebrow">LIST SOMETHING NEW</p><h2 id="sell-title">What are you selling?</h2><p className="modal-copy">Add the basics now. You can fill in more details before posting.</p><label>Item title<input placeholder="e.g. Mini fridge, desk lamp..." /></label><label>Price<input placeholder="$ 0.00" /></label><div className="modal-actions"><button className="cancel-button" type="button" onClick={() => setShowSellForm(false)}>Cancel</button><button className="sell-button" type="button" onClick={() => setShowSellForm(false)}>Continue <span>→</span></button></div></div></div>}
+      {showSellForm && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowSellForm(false) }}>
+          <div className="sell-modal" role="dialog" aria-modal="true" aria-labelledby="sell-title">
+            <button className="modal-close" onClick={() => setShowSellForm(false)} type="button" aria-label="Close">×</button>
+            <p className="eyebrow">LIST SOMETHING NEW</p>
+            <h2 id="sell-title">What are you selling?</h2>
+            <p className="modal-copy">Add the basics now. You can fill in more details before posting.</p>
+            <label>Item title
+              <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g. Mini fridge, desk lamp..." />
+            </label>
+            <label>Price
+              <input value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="$ 0.00" inputMode="decimal" />
+            </label>
+            <label>Category
+              <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
+                {categories.filter((c) => c !== 'All listings').map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+            <label>Condition
+              <select value={newCondition} onChange={(e) => setNewCondition(e.target.value)}>
+                <option>New</option>
+                <option>Like new</option>
+                <option>Good condition</option>
+                <option>Fair</option>
+              </select>
+            </label>
+            {formError && <p role="alert">{formError}</p>}
+            <div className="modal-actions">
+              <button className="cancel-button" type="button" onClick={() => setShowSellForm(false)}>Cancel</button>
+              <button className="sell-button" type="button" onClick={handleCreateListing} disabled={saving}>
+                {saving ? 'Posting…' : 'Post listing'} <span></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )
