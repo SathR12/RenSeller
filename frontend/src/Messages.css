@@ -28,6 +28,10 @@
 .chat-message { margin: 0 0 16px auto; width: fit-content; max-width: 85%; }
 .chat-message p { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--rpi-red); color: white; padding: 12px 15px; margin: 0 0 5px; font-size: 14px; line-height: 1.5; }
 .chat-message span { display: block; color: var(--muted); font-size: 10px; text-align: right; }
+.chat-message.incoming { margin-left: 0; margin-right: auto; }
+.chat-message.incoming p { background: #e8e8e6; color: var(--ink); }
+.chat-message.incoming span { text-align: left; }
+.chat-send-error { color: #a01427; font-size: 13px; line-height: 1.5; }
 .chat-suggestions { display: flex; flex-wrap: wrap; gap: 7px; padding: 8px 22px; }
 .chat-suggestions button { background: white; border: 1px solid var(--line); color: var(--rpi-gray); padding: 7px 9px; font-size: 11px; }
 .chat-composer { padding: 12px 22px 20px; }

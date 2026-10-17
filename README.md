@@ -201,3 +201,42 @@ for delivery to your users' RPI inboxes. Test the email flow with a real account
 request a link, open it, set a new password, sign out, and sign in with the new
 password. Supabase dashboard settings and email delivery are configured separately
 from this repository.
+
+### Messaging student directory
+
+Apply `supabase/migrations/202610160001_messaging_members.sql` in the Supabase
+SQL Editor (or through your Supabase migration workflow) before using Messages.
+It creates a read-only student directory backed by Auth user IDs, backfills
+confirmed RPI accounts, and syncs account changes and deletions. Only signed-in
+RPI accounts can read names and IDs; emails are not exposed by the directory.
+Display names come from signup metadata and are not identity verification.
+
+Messages loads this directory each time it opens, excluding the current account.
+Loading failures and an empty directory never fall back to sample sellers.
+The marketplace listings are still samples and have no real seller IDs, so their
+message buttons are disabled. The Messages navigation opens the actual directory.
+For saved conversations, also apply
+`supabase/migrations/202610160002_direct_messages.sql` once, after the directory
+migration. It adds the messages table, participant-only read access, sender and
+recipient validation, and enables Supabase Realtime for new messages. Browser
+clients cannot update or delete messages or supply their own timestamps.
+
+Messages are saved before the composer clears. Failed sends keep the draft and
+can be retried. Incoming messages update automatically while a conversation is
+open; a 15-second refresh and window-focus refresh also recover missed updates.
+History is loaded in pages so conversations can exceed the API row limit.
+Account deletion removes its messages. Message contents are plain text.
+
+Rebuild the Docker frontend after applying frontend source changes:
+
+```sh
+docker compose up --build -d frontend
+```
+
+Verify with two confirmed RPI accounts in separate browser sessions: select each
+other, send in both directions, and refresh to confirm history persists. Switch
+conversations while sending to check drafts stay with their recipients. Test an
+offline send and retry after reconnecting. A third account must not be able to
+read the conversation through the API, and an insert with another user's sender
+ID must be rejected by row-level security. SQL Editor runs as an administrator
+and therefore does not test browser access restrictions.
