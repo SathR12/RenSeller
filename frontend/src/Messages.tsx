@@ -217,7 +217,18 @@ export default function Messages({ isOpen, userId, onClose }: MessagesProps) {
             <form className="chat-composer" onSubmit={sendMessage}>
               {sendErrors[member.id] && <p className="chat-send-error" role="alert">{sendErrors[member.id]}</p>}
               <label className="chat-input-label" htmlFor="chat-draft">Message about pickup</label>
-              <div><textarea id="chat-draft" ref={composer} rows={2} maxLength={2000} value={draft} onChange={(event) => setDrafts((current) => ({ ...current, [member.id]: event.target.value }))} placeholder="Suggest a pickup place and time…" /><button className="sell-button" disabled={sending || !draft.trim()} type="submit">{sending ? 'Sending...' : 'Send'} <span>→</span></button></div>
+              <div>
+                <textarea id="chat-draft" ref={composer} rows={2} maxLength={2000} value={draft} onChange={(event) => setDrafts((current) => ({ ...current, [member.id]: event.target.value }))} onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && event.nativeEvent.keyCode !== 229) {
+                    event.preventDefault()
+                    if (!event.repeat && !sending && draft.trim()) event.currentTarget.form?.requestSubmit()
+                  }
+                }} aria-describedby="chat-keyboard-hint" placeholder="Suggest a pickup place and time…" />
+                <button className="sell-button chat-send-button" disabled={sending || !draft.trim()} type="submit" aria-label={sending ? 'Sending message' : 'Send message'} title={sending ? 'Sending message' : 'Send message (Enter)'} aria-busy={sending}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
+                </button>
+              </div>
+              <p id="chat-keyboard-hint" className="chat-keyboard-hint">Enter to send · Shift+Enter for a new line</p>
             </form>
           </section>
         </div>}

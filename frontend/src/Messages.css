@@ -39,6 +39,10 @@
 .chat-composer > div { display: flex; align-items: flex-end; gap: 10px; }
 .chat-composer textarea { flex: 1; min-width: 0; resize: vertical; max-height: 130px; background: white; border: 1px solid #b7b9ba; padding: 10px; font: inherit; font-size: 14px; }
 .chat-composer .sell-button:disabled { cursor: default; }
+.chat-composer .chat-send-button { width: 44px; height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; }
+.chat-send-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.chat-send-button:disabled { opacity: .45; }
+.chat-keyboard-hint { margin: 7px 0 0; font-size: 11px; color: var(--muted); }
 @media (max-width: 720px) {
   .account-nav .messages-nav-button:first-child { display: block; }
   .messages-heading { padding: 16px; }
